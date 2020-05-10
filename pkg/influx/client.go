@@ -11,22 +11,17 @@ import (
 )
 
 type Client struct {
-	addr        *net.UDPAddr
-	bufferCh    chan *Point
-	writeCh     chan []string
-	writeBuffer []string
-	logger      *logrus.Entry
-	*Options
-}
-
-type Options struct {
-	address       string
+	addr          *net.UDPAddr
+	bufferCh      chan *Point
+	writeCh       chan []string
+	writeBuffer   []string
+	logger        *logrus.Entry
 	flushInterval uint
 	batchSize     uint
 }
 
-func NewClient(options *Options) (c *Client, err error) {
-	addr, err := net.ResolveUDPAddr("udp", options.address)
+func NewClient(address string, flushInterval uint, batchSize uint) (c *Client, err error) {
+	addr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
 		return
 	}
@@ -34,9 +29,10 @@ func NewClient(options *Options) (c *Client, err error) {
 	c.addr = addr
 	c.bufferCh = make(chan *Point)
 	c.writeCh = make(chan []string)
-	c.writeBuffer = make([]string, 0, options.batchSize+1)
+	c.writeBuffer = make([]string, 0, batchSize+1)
 	c.logger = logrus.WithFields(logrus.Fields{"type": "monitoring", "client": "influx"})
-	c.Options = options
+	c.flushInterval = flushInterval
+	c.batchSize = batchSize
 	go c.bufferProc()
 	go c.writeProc()
 	return
