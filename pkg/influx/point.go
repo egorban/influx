@@ -43,7 +43,7 @@ func (p *Point) toLine() (line string) {
 	if time == "" {
 		return
 	}
-	line = p.table + "," + tags + " " + values + " " + time + "\x0a"
+	line = p.table + "," + tags + " " + values + "\x0a" // " " + time + "\x0a"
 	return
 }
 
