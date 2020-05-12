@@ -3,11 +3,10 @@ package influx
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -15,7 +14,6 @@ type Client struct {
 	bufferCh      chan *Point
 	writeCh       chan []string
 	writeBuffer   []string
-	logger        *logrus.Entry
 	flushInterval uint
 	batchSize     uint
 }
@@ -30,7 +28,6 @@ func NewClient(address string, flushInterval uint, batchSize uint) (c *Client, e
 	c.bufferCh = make(chan *Point)
 	c.writeCh = make(chan []string)
 	c.writeBuffer = make([]string, 0, batchSize+1)
-	c.logger = logrus.WithFields(logrus.Fields{"type": "monitoring", "client": "influx"})
 	c.flushInterval = flushInterval
 	c.batchSize = batchSize
 	go c.bufferProc()
@@ -45,7 +42,7 @@ func (c *Client) WritePoint(point *Point) {
 }
 
 func (c *Client) bufferProc() {
-	c.logger.Println("buffer proc started")
+	log.Println("influx buffer proc started")
 	ticker := time.NewTicker(time.Duration(c.flushInterval))
 	for {
 		select {
@@ -71,23 +68,23 @@ func (c *Client) flushBuffer() {
 }
 
 func (c *Client) writeProc() {
-	c.logger.Infof("write proc start")
+	log.Println("influx write proc start")
 	for {
 		batch := <-c.writeCh
 		conn, err := net.DialUDP("udp", nil, c.addr)
 		if nil != err {
-			c.logger.Errorf("error connect influx %s:", err)
+			log.Println("influx error connect %s:", err)
 		}
 		defer conn.Close()
 		w := bufio.NewWriter(conn)
-		c.logger.Infof("send batch %v", batch)
+		log.Println("influx send batch %v", batch)
 		_, err = fmt.Fprintf(w, strings.Join(batch, ""))
 		if nil != err {
-			c.logger.Errorf("error send metrics to influx %s:", err)
+			log.Println("influx error send metrics %s:", err)
 		}
 		err = w.Flush()
 		if nil != err {
-			c.logger.Errorf("error flush %s:", err)
+			log.Println("influx error flush %s:", err)
 		}
 	}
 }

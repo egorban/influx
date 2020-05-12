@@ -1,6 +1,7 @@
 package influx
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -64,7 +65,7 @@ func (values Values) toLine() (line string) {
 	}
 	for key, value := range values {
 		v := convertValue(value)
-		if key != "" && value != "" {
+		if key != "" && v != "" {
 			line = line + key + "=" + v + ","
 		}
 	}
@@ -78,11 +79,14 @@ func convertValue(v interface{}) string {
 		return v
 	case int:
 		return strconv.Itoa(v)
+	case uint:
+		return strconv.FormatUint(uint64(v), 10)
 	case uint64:
 		return strconv.FormatUint(v, 10)
 	case time.Time:
 		return strconv.FormatInt(v.UnixNano(), 10)
 	default:
+		log.Println("influx error convert value")
 		return ""
 	}
 }
