@@ -4,7 +4,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type Tags map[string]string
@@ -12,10 +11,9 @@ type Tags map[string]string
 type Values map[string]interface{}
 
 type Point struct {
-	table     string
-	tags      Tags
-	values    Values
-	timestamp time.Time
+	table  string
+	tags   Tags
+	values Values
 }
 
 func NewPoint(table string, tags map[string]string, values map[string]interface{}) (p *Point) {
@@ -26,7 +24,6 @@ func NewPoint(table string, tags map[string]string, values map[string]interface{
 	p.table = table
 	p.tags = tags
 	p.values = values
-	p.timestamp = time.Now()
 	return
 }
 
@@ -39,11 +36,7 @@ func (p *Point) toLine() (line string) {
 		return
 	}
 	tags := p.tags.toLine()
-	time := convertValue(p.timestamp)
-	if time == "" {
-		return
-	}
-	line = p.table + "," + tags + " " + values + "\x0a" // " " + time + "\x0a"
+	line = p.table + "," + tags + " " + values + "\x0a"
 	return
 }
 
@@ -84,8 +77,6 @@ func convertValue(v interface{}) string {
 		return strconv.FormatUint(uint64(v), 10)
 	case uint64:
 		return strconv.FormatUint(v, 10)
-	case time.Time:
-		return strconv.FormatInt(v.UnixNano(), 10)
 	default:
 		log.Println("influx error convert value")
 		return ""
