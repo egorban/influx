@@ -43,7 +43,9 @@ func (p *Point) toLine() (line string) {
 	if time == "" {
 		return
 	}
-	return p.table + "," + tags + " " + values + " " + time
+	b := []byte(p.table + "," + tags + " " + values + " " + time)
+	b = append(b, 0xa)
+	return string(b)
 }
 
 func (tags Tags) toLine() (line string) {
