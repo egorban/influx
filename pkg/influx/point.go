@@ -30,7 +30,7 @@ func NewPoint(table string, tags map[string]string, values map[string]interface{
 	return
 }
 
-func (p *Point) toLine() (line string) {
+func (p *Point) toLine() (line []byte) {
 	if p.table == "" {
 		return
 	}
@@ -43,9 +43,10 @@ func (p *Point) toLine() (line string) {
 	if time == "" {
 		return
 	}
-	b := []byte(p.table + "," + tags + " " + values + " " + time)
-	b = append(b, 0xa)
-	return string(b)
+	line = []byte(p.table + "," + tags + " " + values + " " + time)
+	line = append(line, 0xa)
+	return
+	//return string(b)
 }
 
 func (tags Tags) toLine() (line string) {
