@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
 )
 
 type Client struct {
 	addr          *net.UDPAddr
 	bufferCh      chan *Point
-	writeCh       chan []byte
-	writeBuffer   []byte
+	writeCh       chan []string
+	writeBuffer   []string
 	flushInterval uint
 	batchSize     uint
 }
@@ -25,8 +26,8 @@ func NewClient(address string, flushInterval uint, batchSize uint) (c *Client, e
 	c = new(Client)
 	c.addr = addr
 	c.bufferCh = make(chan *Point)
-	c.writeCh = make(chan []byte)
-	c.writeBuffer = make([]byte, 0, batchSize+1)
+	c.writeCh = make(chan []string)
+	c.writeBuffer = make([]string, 0, batchSize+1)
 	c.flushInterval = flushInterval
 	c.batchSize = batchSize
 	go c.bufferProc()
@@ -47,8 +48,8 @@ func (c *Client) bufferProc() {
 		select {
 		case point := <-c.bufferCh:
 			line := point.toLine()
-			if line != nil {
-				c.writeBuffer = append(c.writeBuffer, line...)
+			if line != "" {
+				c.writeBuffer = append(c.writeBuffer, line)
 				if len(c.writeBuffer) == int(c.batchSize) {
 					c.flushBuffer()
 				}
@@ -64,7 +65,7 @@ func (c *Client) bufferProc() {
 func (c *Client) flushBuffer() {
 	log.Println("len c.writeBuffer, c.writeBuffer", len(c.writeBuffer), c.writeBuffer)
 	c.writeCh <- c.writeBuffer
-	c.writeBuffer = []byte(nil)
+	c.writeBuffer = []string(nil)
 }
 
 func (c *Client) writeProc() {
@@ -78,7 +79,7 @@ func (c *Client) writeProc() {
 		defer conn.Close()
 		w := bufio.NewWriter(conn)
 		log.Println("influx send batch", batch)
-		_, err = fmt.Print(w, batch)
+		_, err = fmt.Fprintf(w, strings.Join(batch, ""))
 		if nil != err {
 			log.Println("influx error send metrics", err)
 		}
