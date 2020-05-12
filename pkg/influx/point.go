@@ -81,7 +81,7 @@ func convertValue(v interface{}) string {
 	case uint64:
 		return strconv.FormatUint(v, 10)
 	case time.Time:
-		return v.Format(time.RFC3339Nano)
+		return strconv.FormatInt(v.UnixNano(), 10)
 	default:
 		return ""
 	}
