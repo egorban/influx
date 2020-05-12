@@ -50,14 +50,14 @@ func (c *Client) bufferProc() {
 			line := point.toLine()
 			if line != "" {
 				c.writeBuffer = append(c.writeBuffer, line)
-				if len(c.writeBuffer) == int(c.batchSize) {
-					c.flushBuffer()
-				}
+				//if len(c.writeBuffer) == int(c.batchSize) {
+				c.flushBuffer()
+				//}
 			}
 		case <-ticker.C:
-			if len(c.writeBuffer) > 0 {
-				c.flushBuffer()
-			}
+			// if len(c.writeBuffer) > 0 {
+			// 	c.flushBuffer()
+			// }
 		}
 	}
 }
