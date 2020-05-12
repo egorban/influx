@@ -63,6 +63,7 @@ func (c *Client) bufferProc() {
 }
 
 func (c *Client) flushBuffer() {
+	log.Println("len c.writeBuffer, c.writeBuffer", len(c.writeBuffer), c.writeBuffer)
 	c.writeCh <- c.writeBuffer
 	c.writeBuffer = []string(nil)
 }
