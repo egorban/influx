@@ -73,18 +73,18 @@ func (c *Client) writeProc() {
 		batch := <-c.writeCh
 		conn, err := net.DialUDP("udp", nil, c.addr)
 		if nil != err {
-			log.Println("influx error connect %s:", err)
+			log.Println("influx error connect", err)
 		}
 		defer conn.Close()
 		w := bufio.NewWriter(conn)
-		log.Println("influx send batch %v", batch)
+		log.Println("influx send batch", batch)
 		_, err = fmt.Fprintf(w, strings.Join(batch, ""))
 		if nil != err {
-			log.Println("influx error send metrics %s:", err)
+			log.Println("influx error send metrics", err)
 		}
 		err = w.Flush()
 		if nil != err {
-			log.Println("influx error flush %s:", err)
+			log.Println("influx error flush", err)
 		}
 	}
 }
