@@ -43,14 +43,13 @@ func (c *Client) sendProc() {
 }
 
 func (c *Client) send(line string) {
-	log.Println("influx write proc start")
 	conn, err := net.DialUDP("udp", nil, c.addr)
 	if nil != err {
 		log.Println("influx error connect", err)
 	}
 	defer conn.Close()
 	w := bufio.NewWriter(conn)
-	log.Println("influx send line", line)
+	log.Println("DEBUG influx send line", line)
 	_, err = fmt.Fprintf(w, line)
 	if nil != err {
 		log.Println("influx error send metrics", err)
