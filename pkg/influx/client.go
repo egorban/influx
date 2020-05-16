@@ -49,7 +49,6 @@ func (c *Client) send(line string) {
 	}
 	defer conn.Close()
 	w := bufio.NewWriter(conn)
-	log.Println("DEBUG influx send line", line)
 	_, err = fmt.Fprintf(w, line)
 	if nil != err {
 		log.Println("influx error send metrics", err)
